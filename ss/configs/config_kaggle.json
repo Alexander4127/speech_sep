@@ -1,0 +1,126 @@
+{
+  "name": "2_loud_stride_mr_snr",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 16000
+  },
+  "arch": {
+    "type": "SpexPlusModel",
+    "args": {
+      "tcn_block_params": {
+        "num_blocks": 8,
+        "in_channels": 256,
+        "conv_channels": 512,
+        "kernel_size": 3
+      },
+      "res_block_out": 512,
+      "speaker_dim": 256,
+      "num_speakers": 100,
+      "enc_dim": 256,
+      "L1": 40,
+      "L2": 160,
+      "L3": 320
+    }
+  },
+  "data": {
+    "train": {
+      "batch_size": 2,
+      "num_workers": 2,
+      "dataset": {
+        "type": "MixedDataset",
+        "args": {
+          "underlying": {
+            "type": "LibrispeechDataset",
+            "args": {
+              "data_dir": "/kaggle/input/librispeech/train-clean-360/LibriSpeech",
+              "part": "train-clean-360",
+              "max_audio_length": 20.0,
+              "max_text_length": 200
+            },
+            "module": "ss.datasets"
+          },
+          "max_length": 10000,
+          "max_speakers": 100,
+          "reuse": true
+        }
+      }
+    },
+    "val": {
+      "batch_size": 2,
+      "num_workers": 2,
+      "dataset": {
+        "type": "MixedDataset",
+        "args": {
+          "underlying": {
+            "type": "LibrispeechDataset",
+            "args": {
+              "data_dir": "/kaggle/input/librispeech/dev-clean/LibriSpeech",
+              "part": "dev-clean",
+              "max_audio_length": 20.0,
+              "max_text_length": 200
+            },
+            "module": "ss.datasets"
+          },
+          "snr_levels": 0,
+          "max_length": 500,
+          "max_speakers": 10,
+          "reuse": true,
+          "limit": 300
+        }
+      }
+    }
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 1e-3
+    }
+  },
+  "loss": {
+    "type": "CompositeLoss",
+    "args": {
+      "lam": 0.5,
+      "sdr_params": {},
+      "ce_params": {}
+    }
+  },
+  "metrics": [
+    {
+      "type": "AccuracyMetric",
+      "args": {"name": "accuracy"}
+    },
+    {
+      "type": "PESQMetric",
+      "args": {"sr":  16000, "name": "pesq"}
+    },
+    {
+      "type": "SISDRMetric",
+      "args": {"name": "sdr"}
+    },
+    {
+      "type": "CELossMetric",
+      "args": {"name": "cross_entropy"}
+    }
+  ],
+  "lr_scheduler": {
+    "type": "StepLR",
+    "args": {
+      "step_size": 1000,
+      "gamma": 0.98
+    }
+  },
+  "trainer": {
+    "epochs": 1000,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "verbosity": 2,
+    "monitor": "max val_sdr",
+    "early_stop": 100,
+    "visualize": "wandb",
+    "wandb_project": "ss_project",
+    "wandb_name": "2_loudness_lower_stride_more_snr_levels",
+    "len_epoch": 500,
+    "log_step": 50,
+    "grad_norm_clip": 100
+  }
+}
