@@ -31,8 +31,8 @@
         "args": {
           "underlying": {
             "type": "LibrispeechDataset",
-            "data_dir": "/home/jupyter/mnt/datasets/LibriSpeech/LibriSpeech",
             "args": {
+              "data_dir": "/home/jupyter/mnt/datasets/LibriSpeech/LibriSpeech",
               "part": "train-clean-360",
               "max_audio_length": 20.0,
               "max_text_length": 200
@@ -53,8 +53,8 @@
         "args": {
           "underlying": {
             "type": "LibrispeechDataset",
-            "data_dir": "/home/jupyter/mnt/datasets/LibriSpeech/LibriSpeech",
             "args": {
+              "data_dir": "/home/jupyter/mnt/datasets/LibriSpeech/LibriSpeech",
               "part": "dev-clean",
               "max_audio_length": 20.0,
               "max_text_length": 200
