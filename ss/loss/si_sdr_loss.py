@@ -28,7 +28,7 @@ class SISDRLoss(nn.Module):
         return 20 * torch.log10(eps + torch.norm(s, dim=-1) / (torch.norm(pred - s) + eps))
 
     def forward(self, short, middle, long, target, mix_lengths, **batch) -> Tensor:
-        sdr_short = self._compute_si_sdr(mask_length(short, mix_lengths), target)
-        sdr_middle = self._compute_si_sdr(mask_length(middle, mix_lengths), target)
-        sdr_long = self._compute_si_sdr(mask_length(long, mix_lengths), target)
-        return - (self.sh * sdr_short + self.mid * sdr_middle + self.lng * sdr_long)
+        sdr_short = torch.sum(self._compute_si_sdr(mask_length(short, mix_lengths), target))
+        sdr_middle = torch.sum(self._compute_si_sdr(mask_length(middle, mix_lengths), target))
+        sdr_long = torch.sum(self._compute_si_sdr(mask_length(long, mix_lengths), target))
+        return - (self.sh * sdr_short + self.mid * sdr_middle + self.lng * sdr_long) / short.shape[0]
