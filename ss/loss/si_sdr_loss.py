@@ -1,7 +1,6 @@
 import torch
 from torch import Tensor
 import torch.nn as nn
-from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
 
 from numpy import isclose
 from ss.metric.util import mask_length

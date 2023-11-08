@@ -5,8 +5,8 @@ from random import shuffle
 
 import PIL
 import numpy as np
-import pandas as pd
 import torch
+from torch.cuda.amp import GradScaler
 import torchaudio
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
@@ -135,6 +135,8 @@ class Trainer(BaseTrainer):
         batch = self.move_batch_to_device(batch, self.device)
         if is_train:
             self.optimizer.zero_grad()
+
+        # with torch.autocast(device_type=self.device.type):
         outputs = self.model(**batch)
         if type(outputs) is dict:
             batch.update(outputs)
@@ -142,12 +144,19 @@ class Trainer(BaseTrainer):
             batch["logits"] = outputs
 
         batch["loss"] = self.criterion(**batch)
+
         if is_train:
+            # self.scaler.scale(batch["loss"]).backward()
             batch["loss"].backward()
             self._clip_grad_norm()
             self.optimizer.step()
+            # self.scaler.step(self.optimizer)
+            # self.scaler.update()
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
+
+        for key in ["short", "middle", "long"]:
+            batch[key] = 20 * batch[key] / torch.norm(batch[key], dim=-1, keepdim=True)
 
         metrics.update("loss", batch["loss"].item())
         for met in self.metrics:
