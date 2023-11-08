@@ -22,8 +22,8 @@ class SISDRLoss(nn.Module):
 
     @staticmethod
     def _compute_si_sdr(pred: torch.Tensor, target: torch.Tensor, eps: float = 1e-5) -> torch.Tensor:
-        pred = pred - pred.mean(pred, dim=-1, keepdim=True)
-        target = target - pred.mean(target, dim=-1, keepdim=True)
+        pred = pred - torch.mean(pred, dim=-1, keepdim=True)
+        target = target - torch.mean(target, dim=-1, keepdim=True)
         s = torch.sum(pred * target, dim=-1, keepdim=True) * target / (torch.norm(target, keepdim=True)**2 + eps)
         return 20 * torch.log10(eps + torch.norm(s, dim=-1) / (torch.norm(pred - s) + eps))
 
