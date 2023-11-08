@@ -8,9 +8,9 @@ from .util import mask_length
 
 
 class PESQMetric(BaseMetric):
-    def __init__(self, sr: int, *args, **kwargs):
+    def __init__(self, sr: int = 16000, *args, **kwargs):
         super().__init__()
-        self.pesq = PerceptualEvaluationSpeechQuality(sr, 'nb')
+        self.pesq = PerceptualEvaluationSpeechQuality(sr, 'wb')
 
     def __call__(self, short, target, mix_lengths, **kwargs):
         short = mask_length(short, mix_lengths).detach()
