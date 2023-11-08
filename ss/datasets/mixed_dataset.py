@@ -42,7 +42,7 @@ class MixedDataset(BaseDataset):
                  snr_levels: tp.Tuple = (-5, 5),
                  *args, **kwargs):
         data_dir = ROOT_PATH / "data" / "datasets" / "mixed"
-        data_dir.mkdir(exist_ok=True)
+        data_dir.mkdir(exist_ok=True, parents=True)
         assert isinstance(underlying, BaseDataset)
 
         self._index_dir = ROOT_PATH / "ss" / "datasets"
