@@ -1,5 +1,5 @@
 {
-  "name": "one_batch_test",
+  "name": "1_initial",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -24,8 +24,8 @@
   },
   "data": {
     "train": {
-      "batch_size": 16,
-      "num_workers": 5,
+      "batch_size": 2,
+      "num_workers": 2,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -45,8 +45,8 @@
       }
     },
     "val": {
-      "batch_size": 16,
-      "num_workers": 5,
+      "batch_size": 2,
+      "num_workers": 2,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -112,7 +112,7 @@
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "one_batch_test",
+    "wandb_name": "1_initial",
     "len_epoch": 100,
     "log_step": 20,
     "grad_norm_clip": 100

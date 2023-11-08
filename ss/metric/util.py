@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from torchmetrics.audio import SignalDistortionRatio, ScaleInvariantSignalDistortionRatio
+from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
 
 
 def mask_length(x: torch.Tensor, lengths: torch.Tensor):

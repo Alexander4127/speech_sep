@@ -13,6 +13,6 @@ class PESQMetric(BaseMetric):
         self.pesq = PerceptualEvaluationSpeechQuality(sr, 'wb')
 
     def __call__(self, short, target, mix_lengths, **kwargs):
-        short = mask_length(short, mix_lengths).detach()
-        target = target.detach()
+        short = mask_length(short, mix_lengths).detach().cpu()
+        target = target.detach().cpu()
         return self.pesq(short, target)
