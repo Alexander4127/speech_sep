@@ -15,7 +15,7 @@
       },
       "res_block_out": 512,
       "speaker_dim": 256,
-      "num_speakers": 10,
+      "num_speakers": 100,
       "enc_dim": 256,
       "L1": 20,
       "L2": 80,
@@ -24,13 +24,14 @@
   },
   "data": {
     "train": {
-      "batch_size": 10,
+      "batch_size": 16,
       "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
         "args": {
           "underlying": {
             "type": "LibrispeechDataset",
+            "data_dir": "/home/jupyter/mnt/datasets/LibriSpeech/LibriSpeech",
             "args": {
               "part": "train-clean-360",
               "max_audio_length": 20.0,
@@ -45,23 +46,25 @@
       }
     },
     "val": {
-      "batch_size": 10,
+      "batch_size": 16,
       "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
         "args": {
           "underlying": {
             "type": "LibrispeechDataset",
+            "data_dir": "/home/jupyter/mnt/datasets/LibriSpeech/LibriSpeech",
             "args": {
-              "part": "dev-clean-360",
+              "part": "dev-clean",
               "max_audio_length": 20.0,
               "max_text_length": 200
             },
             "module": "ss.datasets"
           },
-          "max_length": 1000,
+          "max_length": 500,
           "max_speakers": 10,
-          "reuse": true
+          "reuse": true,
+          "limit": 300
         }
       }
     }

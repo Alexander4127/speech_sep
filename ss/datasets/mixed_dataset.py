@@ -7,6 +7,8 @@ import multiprocessing
 import os
 from pathlib import Path
 import random
+
+import numpy as np
 from tqdm import tqdm
 import typing as tp
 
@@ -42,6 +44,7 @@ class MixedDataset(BaseDataset):
         data_dir.mkdir(exist_ok=True)
         assert isinstance(underlying, BaseDataset)
 
+        self._index_dir = ROOT_PATH / "ss" / "datasets"
         self._data_dir = Path(data_dir)
         self._max_speakers = max_speakers
         self._max_length = max_length
@@ -56,7 +59,7 @@ class MixedDataset(BaseDataset):
         self._assert_index_is_valid(self._index)
 
     def _get_or_load_index(self, name: str, underlying: BaseDataset, reuse: bool):
-        index_path = self._data_dir / f"{name}-index.json"
+        index_path = self._index_dir / f"mixed-{name}-index.json"
         if index_path.exists() and reuse:
             logger.warning('Reuse parameter set to True, reusing existing index.')
             with index_path.open() as f:
@@ -68,6 +71,7 @@ class MixedDataset(BaseDataset):
         return index
 
     def _generate_triplets(self, underlying: BaseDataset):
+        np.random.seed(0)
         under_index = deepcopy(underlying._index)
         for idx, data in enumerate(under_index):
             data["index"] = idx
@@ -102,7 +106,7 @@ class MixedDataset(BaseDataset):
 
         return all_triplets
 
-    def generate_mixes(self, underlying, snr_levels=(-5, 5), update_steps=10):
+    def generate_mixes(self, underlying, snr_levels=(-5, 5)):
         triplets: tp.Dict[str, list] = self._generate_triplets(underlying)
         assert len(triplets["target"]) == self._max_length
 
@@ -127,15 +131,13 @@ class MixedDataset(BaseDataset):
                 futures.append(pool.submit(create_mix, i, triplet, snr_levels, out_dir,
                                            test=self._test))
 
-            for i, future in enumerate(futures):
+            for i, future in tqdm(enumerate(futures), desc="Creating mixes...", total=len(futures)):
                 d_paths = future.result()
                 if d_paths is None:
                     continue
                 for d in d_paths:
                     d.update(speaker_index[i])
                     index.append(d)
-                if (i + 1) % max(self._max_length // update_steps, 1) == 0:
-                    logger.info(f"Files Processed | {i + 1} out of {self._max_length}")
 
         logger.info(f'Extracted {len(index)} audio')
 
