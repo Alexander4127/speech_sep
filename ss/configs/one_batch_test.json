@@ -24,7 +24,7 @@
   },
     "data": {
     "train": {
-      "batch_size": 10,
+      "batch_size": 2,
       "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
@@ -46,7 +46,7 @@
       }
     },
     "val": {
-      "batch_size": 10,
+      "batch_size": 2,
       "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
@@ -93,7 +93,11 @@
     },
     {
       "type": "SISDRMetric",
-      "args": {"name": "si-sdr"}
+      "args": {"name": "sdr"}
+    },
+    {
+      "type": "CELossMetric",
+      "args": {"name": "cross_entropy"}
     }
   ],
   "lr_scheduler": {
@@ -108,7 +112,7 @@
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
-    "monitor": "min val_loss",
+    "monitor": "max val_sdr",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",

@@ -93,7 +93,11 @@
     },
     {
       "type": "SISDRMetric",
-      "args": {"name": "si-sdr"}
+      "args": {"name": "sdr"}
+    },
+    {
+      "type": "CELossMetric",
+      "args": {"name": "cross_entropy"}
     }
   ],
   "lr_scheduler": {
@@ -108,13 +112,13 @@
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
-    "monitor": "min val_loss",
+    "monitor": "max val_sdr",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
     "wandb_name": "1_initial",
-    "len_epoch": 100,
-    "log_step": 20,
+    "len_epoch": 500,
+    "log_step": 50,
     "grad_norm_clip": 100
   }
 }
