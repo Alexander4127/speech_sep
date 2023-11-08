@@ -45,6 +45,7 @@ class MixedDataset(BaseDataset):
         data_dir.mkdir(exist_ok=True, parents=True)
         assert isinstance(underlying, BaseDataset)
 
+        self._name = name
         self._index_dir = ROOT_PATH / "ss" / "datasets"
         self._data_dir = Path(data_dir)
         self._max_speakers = max_speakers
@@ -119,8 +120,8 @@ class MixedDataset(BaseDataset):
                 "text": triplets["text"][i]
             } for i in range(self._max_length)]
         index = []
-        out_dir = self._data_dir / "data"
-        out_dir.mkdir(exist_ok=True)
+        out_dir = self._data_dir / "data" / self._name
+        out_dir.mkdir(exist_ok=True, parents=True)
         with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as pool:
             futures = []
             for i in range(self._max_length):
