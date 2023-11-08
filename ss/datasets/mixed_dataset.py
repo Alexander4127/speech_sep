@@ -39,6 +39,7 @@ class MixedDataset(BaseDataset):
                  max_length: int = 1_000_000,
                  reuse: bool = True,
                  test: bool = False,
+                 snr_levels: tp.Tuple = (-5, 5),
                  *args, **kwargs):
         data_dir = ROOT_PATH / "data" / "datasets" / "mixed"
         data_dir.mkdir(exist_ok=True)
@@ -49,6 +50,7 @@ class MixedDataset(BaseDataset):
         self._max_speakers = max_speakers
         self._max_length = max_length
         self._test = test
+        self._snr_levels = [snr_levels] if not isinstance(snr_levels, tp.Iterable) else list(snr_levels)
 
         index = self._get_or_load_index(name, underlying, reuse)
         self._speakers = sorted({d["speaker_id"] for d in index})
@@ -106,7 +108,7 @@ class MixedDataset(BaseDataset):
 
         return all_triplets
 
-    def generate_mixes(self, underlying, snr_levels=(-5, 5)):
+    def generate_mixes(self, underlying):
         triplets: tp.Dict[str, list] = self._generate_triplets(underlying)
         assert len(triplets["target"]) == self._max_length
 
@@ -128,7 +130,7 @@ class MixedDataset(BaseDataset):
                            "target_id": triplets["target_id"][i],
                            "noise_id": triplets["noise_id"][i]}
 
-                futures.append(pool.submit(create_mix, i, triplet, snr_levels, out_dir,
+                futures.append(pool.submit(create_mix, i, triplet, self._snr_levels, out_dir,
                                            test=self._test))
 
             for i, future in tqdm(enumerate(futures), desc="Creating mixes...", total=len(futures)):

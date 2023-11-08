@@ -61,6 +61,7 @@
             },
             "module": "ss.datasets"
           },
+          "snr_levels": 0,
           "max_length": 500,
           "max_speakers": 10,
           "reuse": true,
