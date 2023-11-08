@@ -112,7 +112,7 @@ class SpexPlusModel(nn.Module):
 
         out_len_spk = (len_spk - self.L1) // self.stride + 1  # encoder block
         out_len_spk //= 27  # max pooling in 3 res blocks
-        spk_proj = torch.sum(spk_proj, dim=-1) / torch.tensor(out_len_spk).view(-1, 1).float()
+        spk_proj = torch.sum(spk_proj, dim=-1) / float(out_len_spk)
 
         out = self.block1_spk(mix_proj, spk_proj)
         out = self.block1_ord(out)
