@@ -1,9 +1,10 @@
 import torch
 from torch import Tensor
 import torch.nn as nn
+from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
 
 from numpy import isclose
-from ss.metric.util import si_sdr, mask_length
+from ss.metric.util import mask_length
 
 
 class SISDRLoss(nn.Module):
@@ -22,10 +23,11 @@ class SISDRLoss(nn.Module):
 
     @staticmethod
     def _compute_si_sdr(est: torch.Tensor, target: torch.Tensor, eps: float = 1e-5) -> torch.Tensor:
-        est = est - torch.mean(est, dim=-1, keepdim=True)
-        target = target - torch.mean(target, dim=-1, keepdim=True)
-        a = torch.sum(est * target, dim=-1, keepdim=True) / (torch.norm(target, keepdim=True)**2 + eps)
-        return 20 * torch.log10(torch.norm(a * target, dim=-1) / (torch.norm(est - a * target) + eps))
+        alpha = (torch.sum(est * target, dim=-1, keepdim=True) + eps) / \
+                (torch.sum(target ** 2, dim=-1, keepdim=True) + eps)
+        target_scaled = alpha * target
+        val = (torch.sum(target_scaled ** 2, dim=-1) + eps) / (torch.sum((target_scaled - est) ** 2, dim=-1) + eps)
+        return 10 * torch.log10(val)
 
     def forward(self, short, middle, long, target, mix_lengths, **batch) -> Tensor:
         sdr_short = torch.sum(self._compute_si_sdr(mask_length(short, mix_lengths), target))
