@@ -1,5 +1,5 @@
 {
-  "name": "2_finetune_zero_snr_with_test",
+  "name": "2_restart_batch_accum",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -38,10 +38,9 @@
             },
             "module": "ss.datasets"
           },
-          "max_length": 10000,
-          "max_speakers": 100,
-          "reuse": false,
-          "snr_levels": 0
+          "max_length": 15000,
+          "max_speakers": 250,
+          "reuse": false
         }
       }
     },
@@ -95,7 +94,7 @@
   "optimizer": {
     "type": "Adam",
     "args": {
-      "lr": 1e-4
+      "lr": 1e-3
     }
   },
   "loss": {
@@ -128,20 +127,20 @@
     "type": "StepLR",
     "args": {
       "step_size": 1000,
-      "gamma": 0.95
+      "gamma": 0.98
     }
   },
   "trainer": {
     "epochs": 1000,
     "save_dir": "saved/",
     "save_period": 5,
-    "batch_accum": 5,
+    "batch_accum": 10,
     "verbosity": 2,
     "monitor": "max val_sdr",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "2_finetune_batch_accum_zero_snr_test",
+    "wandb_name": "2_restart_batch_ac_more_snr_lvls",
     "len_epoch": 500,
     "log_step": 50,
     "grad_norm_clip": 100

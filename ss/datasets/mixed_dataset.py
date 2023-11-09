@@ -39,7 +39,7 @@ class MixedDataset(BaseDataset):
                  max_length: int = 1_000_000,
                  reuse: bool = True,
                  test: bool = False,
-                 snr_levels: tp.Tuple = (-5, 5),
+                 snr_levels: tp.Tuple = (-5, -2, 0, 2, 5),
                  *args, **kwargs):
         data_dir = ROOT_PATH / "data" / "datasets" / "mixed"
         data_dir.mkdir(exist_ok=True, parents=True)
