@@ -15,7 +15,7 @@
       },
       "res_block_out": 512,
       "speaker_dim": 256,
-      "num_speakers": 100,
+      "num_speakers": 250,
       "enc_dim": 256,
       "L1": 20,
       "L2": 80,
@@ -40,7 +40,7 @@
           },
           "max_length": 15000,
           "max_speakers": 250,
-          "reuse": false
+          "reuse": true
         }
       }
     },
