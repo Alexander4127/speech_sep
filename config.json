@@ -1,5 +1,5 @@
 {
-  "name": "2_finetune_zero_snr_batch_ac",
+  "name": "2_finetune_zero_snr_with_test",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -67,6 +67,29 @@
           "limit": 300
         }
       }
+    },
+    "test": {
+      "batch_size": 2,
+      "num_workers": 2,
+      "dataset": {
+        "type": "MixedDataset",
+        "args": {
+          "underlying": {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "test-clean",
+              "max_audio_length": 20.0,
+              "max_text_length": 200
+            },
+            "module": "ss.datasets"
+          },
+          "snr_levels": 0,
+          "max_length": 500,
+          "max_speakers": 10,
+          "reuse": true,
+          "test": true
+        }
+      }
     }
   },
   "optimizer": {
@@ -118,7 +141,7 @@
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "2_finetune_batch_accum_zero_snr",
+    "wandb_name": "2_finetune_batch_accum_zero_snr_test",
     "len_epoch": 500,
     "log_step": 50,
     "grad_norm_clip": 100
