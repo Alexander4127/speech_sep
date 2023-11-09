@@ -33,6 +33,7 @@ class Trainer(BaseTrainer):
             config,
             device,
             dataloaders,
+            batch_accum=1,
             lr_scheduler=None,
             len_epoch=None,
             log_step=50,
@@ -42,6 +43,7 @@ class Trainer(BaseTrainer):
         self.skip_oom = skip_oom
         self.config = config
         self.train_dataloader = dataloaders["train"]
+        self.batch_accum = batch_accum
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.train_dataloader)
@@ -92,6 +94,7 @@ class Trainer(BaseTrainer):
                 batch = self.process_batch(
                     batch,
                     is_train=True,
+                    idx=batch_idx,
                     metrics=self.train_metrics,
                 )
             except RuntimeError as e:
@@ -131,7 +134,7 @@ class Trainer(BaseTrainer):
 
         return log
 
-    def process_batch(self, batch, is_train: bool, metrics: MetricTracker):
+    def process_batch(self, batch, is_train: bool, idx: int, metrics: MetricTracker):
         batch = self.move_batch_to_device(batch, self.device)
         if is_train:
             self.optimizer.zero_grad()
@@ -148,10 +151,11 @@ class Trainer(BaseTrainer):
         if is_train:
             # self.scaler.scale(batch["loss"]).backward()
             batch["loss"].backward()
-            self._clip_grad_norm()
-            self.optimizer.step()
-            # self.scaler.step(self.optimizer)
-            # self.scaler.update()
+            if (idx - 1) % self.batch_accum == 0:
+                self._clip_grad_norm()
+                self.optimizer.step()
+                # self.scaler.step(self.optimizer)
+                # self.scaler.update()
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
@@ -181,6 +185,7 @@ class Trainer(BaseTrainer):
                 batch = self.process_batch(
                     batch,
                     is_train=False,
+                    idx=batch_idx,
                     metrics=self.evaluation_metrics,
                 )
             self.writer.set_step(epoch * self.len_epoch, part)
