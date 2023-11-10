@@ -1,5 +1,5 @@
 {
-  "name": "2_loud_stride_mr_snr",
+  "name": "3_reduce_lr_batch_acc",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -17,9 +17,9 @@
       "speaker_dim": 256,
       "num_speakers": 100,
       "enc_dim": 256,
-      "L1": 40,
-      "L2": 160,
-      "L3": 320
+      "L1": 20,
+      "L2": 80,
+      "L3": 160
     }
   },
   "data": {
@@ -103,22 +103,23 @@
     }
   ],
   "lr_scheduler": {
-    "type": "StepLR",
+    "type": "ReduceLROnPlateau",
     "args": {
-      "step_size": 1000,
-      "gamma": 0.98
+      "factor": 0.5,
+      "patience": 20
     }
   },
   "trainer": {
     "epochs": 1000,
     "save_dir": "saved/",
+    "batch_accum": 5,
     "save_period": 5,
     "verbosity": 2,
     "monitor": "max val_sdr",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "2_loudness_lower_stride_more_snr_levels",
+    "wandb_name": "3_kaggle_reduce_lr_batch_acc",
     "len_epoch": 500,
     "log_step": 50,
     "grad_norm_clip": 100
