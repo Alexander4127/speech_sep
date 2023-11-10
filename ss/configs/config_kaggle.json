@@ -68,6 +68,30 @@
           "limit": 300
         }
       }
+    },
+    "test": {
+      "batch_size": 2,
+      "num_workers": 2,
+      "dataset": {
+        "type": "MixedDataset",
+        "args": {
+          "underlying": {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "test-clean",
+              "max_audio_length": 20.0,
+              "max_text_length": 200
+            },
+            "module": "ss.datasets"
+          },
+          "snr_levels": 0,
+          "max_length": 500,
+          "max_speakers": 10,
+          "reuse": true,
+          "test": true,
+          "limit": 100
+        }
+      }
     }
   },
   "optimizer": {
@@ -105,6 +129,7 @@
   "lr_scheduler": {
     "type": "ReduceLROnPlateau",
     "args": {
+      "mode": "max",
       "factor": 0.5,
       "patience": 20
     }

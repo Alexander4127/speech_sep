@@ -17,6 +17,7 @@ from ss.base import BaseTrainer
 from ss.logger.utils import plot_spectrogram_to_buf
 from ss.metric.util import si_sdr
 from ss.utils import inf_loop, MetricTracker
+from ss.metric import SISDRMetric
 
 
 class Trainer(BaseTrainer):
@@ -156,7 +157,8 @@ class Trainer(BaseTrainer):
                 self.optimizer.step()
                 # self.scaler.step(self.optimizer)
                 # self.scaler.update()
-            if self.lr_scheduler is not None:
+            if self.lr_scheduler is not None and \
+                    not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 self.lr_scheduler.step()
 
         for key in ["short", "middle", "long"]:
@@ -195,7 +197,13 @@ class Trainer(BaseTrainer):
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins="auto")
-        return self.evaluation_metrics.result()
+        result = self.evaluation_metrics.result()
+
+        if self.lr_scheduler is not None and \
+                isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+            self.lr_scheduler.step(result[self.mnt_metric])
+
+        return result
 
     def _progress(self, batch_idx):
         base = "[{}/{} ({:.0f}%)]"
