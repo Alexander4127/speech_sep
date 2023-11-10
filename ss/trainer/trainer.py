@@ -201,7 +201,7 @@ class Trainer(BaseTrainer):
 
         if self.lr_scheduler is not None and \
                 isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-            self.lr_scheduler.step(result[self.mnt_metric])
+            self.lr_scheduler.step(result[self.mnt_metric.split('_')[1]])
 
         return result
 
