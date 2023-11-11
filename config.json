@@ -1,5 +1,5 @@
 {
-  "name": "3_bigger_batch_reduce_lr",
+  "name": "4_finetune_with_reduce_lr",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -24,8 +24,8 @@
   },
   "data": {
     "train": {
-      "batch_size": 5,
-      "num_workers": 5,
+      "batch_size": 2,
+      "num_workers": 2,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -40,13 +40,13 @@
           },
           "max_length": 15000,
           "max_speakers": 250,
-          "reuse": true
+          "reuse": false
         }
       }
     },
     "val": {
-      "batch_size": 5,
-      "num_workers": 5,
+      "batch_size": 2,
+      "num_workers": 2,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -68,8 +68,8 @@
       }
     },
     "test": {
-      "batch_size": 5,
-      "num_workers": 5,
+      "batch_size": 2,
+      "num_workers": 2,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -95,7 +95,7 @@
   "optimizer": {
     "type": "Adam",
     "args": {
-      "lr": 1e-3
+      "lr": 1e-4
     }
   },
   "loss": {
@@ -138,10 +138,11 @@
     "save_period": 5,
     "verbosity": 2,
     "monitor": "max val_sdr",
+    "batch_accum": 10,
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "3_bigger_batch_reduce_on_plat",
+    "wandb_name": "4_finetune_with_reduce_lr",
     "len_epoch": 500,
     "log_step": 50,
     "grad_norm_clip": 100

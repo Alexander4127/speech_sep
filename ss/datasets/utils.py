@@ -96,7 +96,7 @@ def create_mix(idx, triplet, snr_levels, out_dir, audio_len=3, test=False, sr=16
 
     d_paths = []
     if not test:
-        s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
+        # s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
         s1_cut, s2_cut = cut_audios(s1, s2, audio_len, sr)
 
         for i in range(len(s1_cut)):
