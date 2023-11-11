@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class CustomDirAudioDataset(CustomAudioDataset):
     def __init__(self, audio_dir, *args, **kwargs):
         entries = defaultdict(dict)
-        for path in glob.glob(audio_dir, recursive=True):
+        for path in glob.glob(f'{str(audio_dir)}/**', recursive=True):
             path = Path(path)
             if path.suffix in [".mp3", ".wav", ".flac", ".m4a"]:
                 tp = path.parent.name.strip("s")
@@ -22,6 +22,10 @@ class CustomDirAudioDataset(CustomAudioDataset):
                 assert file_name.endswith(f"-{suffix}")
                 idx = file_name[:-len(f"-{suffix}")]
 
-                entries[idx][tp] = path
+                entries[idx][tp + "_path"] = path
+
+        for entry in entries.values():
+            entry["path"] = entry["text"] = ""
+            entry["audio_len"] = entry["speaker_id"] = 0
 
         super().__init__(list(entries.values()), *args, **kwargs)

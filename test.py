@@ -62,7 +62,7 @@ def main(config, out_file, gen_dir):
             if gen_dir is not None:
                 audio_dir = (gen_dir / test_name / "audio").absolute().resolve()
                 audio_dir.mkdir(exist_ok=True, parents=True)
-                text_dir = (gen_dir / test_name / "audio").absolute().resolve()
+                text_dir = (gen_dir / test_name / "text").absolute().resolve()
                 text_dir.mkdir(exist_ok=True, parents=True)
 
             n_samples = 0
@@ -74,7 +74,7 @@ def main(config, out_file, gen_dir):
                 for i in range(len(batch["short"])):
                     loudness = meter.integrated_loudness(batch["short"][i].detach().cpu().numpy())
                     batch["short"][i] = torch.tensor(
-                        pyln.normalize.loudness(batch["short"][i], loudness, -23.0)
+                        pyln.normalize.loudness(batch["short"][i].cpu().numpy(), loudness, -23.0)
                     ).to(device)
 
                 batch_size = len(batch["short"])
@@ -97,11 +97,11 @@ def main(config, out_file, gen_dir):
 
     metrics_df = pd.DataFrame()
     logger.info('\n\n\n    Final:')
-    for test_name, vals in results.values():
+    for test_name, vals in results.items():
         logger.info(f'\n\n    {test_name} results:')
         for algo_name, val in vals.items():
-            logger.info(f'    {algo_name}: {np.mean(vals):.6f}')
-            metrics_df.loc[test_name, algo_name] = np.mean(vals)
+            logger.info(f'    {algo_name}: {val:.6f}')
+            metrics_df.loc[test_name, algo_name] = val
 
     logger.info(f'    Saving metrics in {out_file.split(".")[0] + ".csv"}')
     metrics_df.to_csv(out_file.split('.')[0] + '.csv')
@@ -154,14 +154,14 @@ if __name__ == "__main__":
     args.add_argument(
         "-b",
         "--batch-size",
-        default=20,
+        default=2,
         type=int,
         help="Test dataset batch size",
     )
     args.add_argument(
         "-j",
         "--jobs",
-        default=5,
+        default=2,
         type=int,
         help="Number of workers for test dataloader",
     )
@@ -189,16 +189,12 @@ if __name__ == "__main__":
         assert test_data_folder.exists()
         config.config["data"] = {
             "test": {
-                "batch_size": args.batch_size,
-                "num_workers": args.jobs,
-                "datasets": [
-                    {
-                        "type": "CustomDirAudioDataset",
-                        "args": {
-                            "audio_dir": str(test_data_folder / "audio")
-                        },
+                "dataset": {
+                    "type": "CustomDirAudioDataset",
+                    "args": {
+                        "audio_dir": test_data_folder
                     }
-                ],
+                }
             }
         }
 
