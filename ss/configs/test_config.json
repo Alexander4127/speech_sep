@@ -1,50 +1,52 @@
 {
+  "name": "3_bigger_batch_reduce_lr",
+  "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
   },
-  "n_gpu": 1,
   "arch": {
     "type": "SpexPlusModel",
     "args": {
-      "L1": 20,
-      "L2": 80,
-      "L3": 160,
-      "enc_dim": 256,
-      "speaker_dim": 256,
-      "num_speakers": 250,
-      "res_block_out": 512,
       "tcn_block_params": {
         "num_blocks": 8,
         "in_channels": 256,
-        "kernel_size": 3,
-        "conv_channels": 512
-      }
+        "conv_channels": 512,
+        "kernel_size": 3
+      },
+      "res_block_out": 512,
+      "speaker_dim": 256,
+      "num_speakers": 250,
+      "enc_dim": 256,
+      "L1": 20,
+      "L2": 80,
+      "L3": 160
     }
   },
   "data": {
     "test": {
+      "batch_size": 2,
+      "num_workers": 2,
       "dataset": {
         "type": "MixedDataset",
         "args": {
           "underlying": {
             "type": "LibrispeechDataset",
             "args": {
-              "part": "train-clean-360",
+              "part": "test-clean",
               "max_audio_length": 20.0,
               "max_text_length": 200
             },
             "module": "ss.datasets"
           },
-          "test": true,
-          "reuse": true,
-          "max_length": 500,
           "snr_levels": 0,
-          "max_speakers": 10
-        },
-      },
-      "batch_size": 2,
-      "num_workers": 2
-    }
+          "max_length": 500,
+          "max_speakers": 10,
+          "reuse": true,
+          "test": true,
+          "limit": 100
+        }
+      }
+    },
   },
   "loss": {
     "type": "CompositeLoss",
