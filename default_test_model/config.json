@@ -1,0 +1,74 @@
+{
+  "name": "test_infer",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 16000
+  },
+  "arch": {
+    "type": "SpexPlusModel",
+    "args": {
+      "tcn_block_params": {
+        "num_blocks": 8,
+        "in_channels": 256,
+        "conv_channels": 512,
+        "kernel_size": 3
+      },
+      "res_block_out": 512,
+      "speaker_dim": 256,
+      "num_speakers": 250,
+      "enc_dim": 256,
+      "L1": 20,
+      "L2": 80,
+      "L3": 160
+    }
+  },
+  "data": {
+    "test": {
+      "batch_size": 1,
+      "num_workers": 1,
+      "dataset": {
+        "type": "MixedDataset",
+        "args": {
+          "underlying": {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "test-clean",
+              "max_audio_length": 20.0,
+              "max_text_length": 200
+            },
+            "module": "ss.datasets"
+          },
+          "snr_levels": 0,
+          "max_length": 500,
+          "max_speakers": 10,
+          "reuse": true,
+          "test": true
+        }
+      }
+    }
+  },
+  "loss": {
+    "type": "CompositeLoss",
+    "args": {
+      "lam": 0.5,
+      "ce_params": {},
+      "sdr_params": {}
+    }
+  },
+  "metrics": {},
+  "trainer": {
+    "epochs": 1000,
+    "monitor": "max val_sdr",
+    "log_step": 50,
+    "save_dir": "saved/",
+    "len_epoch": 500,
+    "verbosity": 2,
+    "visualize": "wandb",
+    "early_stop": 100,
+    "wandb_name": "test_infer",
+    "batch_accum": 10,
+    "save_period": 5,
+    "wandb_project": "ss_project",
+    "grad_norm_clip": 100
+  }
+}
