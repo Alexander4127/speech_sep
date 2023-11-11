@@ -24,8 +24,6 @@
   },
   "data": {
     "test": {
-      "batch_size": 1,
-      "num_workers": 1,
       "dataset": {
         "type": "MixedDataset",
         "args": {
