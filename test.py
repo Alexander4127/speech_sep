@@ -56,7 +56,7 @@ def main(config, out_file, gen_dir):
     sr = config["preprocessing"]["sr"]
     pesq = PESQMetric(sr=sr)
     si_sdr = SISDRMetric()
-    meter = pyln.Meter(sr=sr)
+    meter = pyln.Meter(sr)
     with torch.no_grad():
         for test_name in filter(lambda name: name.startswith("test"), dataloaders.keys()):
             if gen_dir is not None:
@@ -72,12 +72,14 @@ def main(config, out_file, gen_dir):
                 batch.update(output)
 
                 for i in range(len(batch["short"])):
-                    loudness = meter.integrated_loudness(batch["short"])
-                    batch["short"][i] = pyln.normalize.loudness(batch["short"][i], loudness, -23.0)
+                    loudness = meter.integrated_loudness(batch["short"][i].detach().cpu().numpy())
+                    batch["short"][i] = torch.tensor(
+                        pyln.normalize.loudness(batch["short"][i], loudness, -23.0)
+                    ).to(device)
 
                 batch_size = len(batch["short"])
-                results[test_name]["pesq"] += pesq(**batch) * batch_size
-                results[test_name]["si_sdr"] += si_sdr(**batch) * batch_size
+                results[test_name]["pesq"] += pesq(**batch).item() * batch_size
+                results[test_name]["si_sdr"] += si_sdr(**batch).item() * batch_size
                 n_samples += batch_size
 
                 if gen_dir is not None:
