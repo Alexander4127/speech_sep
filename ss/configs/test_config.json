@@ -46,7 +46,7 @@
           "limit": 100
         }
       }
-    },
+    }
   },
   "loss": {
     "type": "CompositeLoss",
