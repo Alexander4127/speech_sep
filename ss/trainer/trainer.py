@@ -166,7 +166,11 @@ class Trainer(BaseTrainer):
 
         metrics.update("loss", batch["loss"].item())
         for met in self.metrics:
-            metrics.update(met.name, met(**batch))
+            try:
+                metrics.update(met.name, met(**batch))
+            except Exception as err:
+                self.logger.warning(f'Caught {err}')
+                metrics.update(met.name, np.nan)
         return batch
 
     def _evaluation_epoch(self, epoch, part, dataloader):
