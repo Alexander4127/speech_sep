@@ -39,7 +39,7 @@
             },
             "module": "ss.datasets"
           },
-          "max_length": 12000,
+          "max_length": 7000,
           "max_speakers": 250,
           "reuse": true
         }
@@ -64,7 +64,6 @@
           "snr_levels": 0,
           "max_length": 500,
           "max_speakers": 10,
-          "test": true,
           "reuse": true,
           "limit": 150
         }

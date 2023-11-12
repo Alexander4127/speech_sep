@@ -1,9 +1,11 @@
+from copy import deepcopy
 import os
 
 import librosa
 import numpy as np
 import soundfile as sf
 import pyloudnorm as pyln
+import torch
 import torchaudio
 
 
@@ -22,7 +24,7 @@ def vad_merge(w, top_db):
     return np.concatenate(temp, axis=None)
 
 
-def cut_audios(s1, s2, sec, sr):
+def cut_audios(s1, s2, sec, sr, equal_lengths: bool = False):
     cut_len = sr * sec
     len1 = len(s1)
     len2 = len(s2)
@@ -37,7 +39,33 @@ def cut_audios(s1, s2, sec, sr):
 
         segment += 1
 
+    if equal_lengths and cut_len < len1:
+        assert len1 == len2
+        s1_r, s2_r = s1[cut_len * len(s2_cut):], s2[cut_len * len(s1_cut):]
+        s1_r = np.append(s1_r, np.zeros(len(s1) - cut_len))
+        s2_r = np.append(s2_r, np.zeros(len(s2) - cut_len))
+        assert len(s1_r) == len(s2_r) == cut_len
+        s1_cut.append(s1_r)
+        s2_cut.append(s2_r)
+
     return s1_cut, s2_cut
+
+
+# def split_batch(batch):
+#     keys = ["mix", "target"]
+#     cut_mix_1, cut_mix_2 = cut_audios(batch["short"])
+#     assert len(cut_mix_1) == len(cut_mix_2)
+#     for idx in range(len(cut_mix_1)):
+#
+#         for key in keys:
+#             current_batch = [batch[key] for set(batch.keys()) - set(keys)]
+
+
+def stack_batch(batches, len_batch, keys=("short", "target")):
+    result_batch = deepcopy(batches[0])
+    for key in keys:
+        result_batch[key] = torch.stack([batch[key] for batch in batches]).reshape(-1)[:len_batch]
+    return result_batch
 
 
 def fix_length(s1, s2, min_or_max='max'):
@@ -96,7 +124,7 @@ def create_mix(idx, triplet, snr_levels, out_dir, audio_len=3, test=False, sr=16
 
     d_paths = []
     if not test:
-        # s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
+        s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
         s1_cut, s2_cut = cut_audios(s1, s2, audio_len, sr)
 
         for i in range(len(s1_cut)):
