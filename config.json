@@ -63,8 +63,8 @@
           "max_length": 500,
           "max_speakers": 10,
           "test": true,
-          "reuse": false,
-          "limit": 300
+          "reuse": true,
+          "limit": 150
         }
       }
     },
