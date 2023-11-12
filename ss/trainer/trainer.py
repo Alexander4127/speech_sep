@@ -45,6 +45,7 @@ class Trainer(BaseTrainer):
         self.config = config
         self.train_dataloader = dataloaders["train"]
         self.batch_accum = batch_accum
+        self.len_loader = len(self.train_dataloader)
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.train_dataloader)
@@ -205,7 +206,7 @@ class Trainer(BaseTrainer):
 
         if self.lr_scheduler is not None and \
                 isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-            n_epochs = int(len(self.train_dataloader) / self.len_epoch)
+            n_epochs = int(self.len_loader / self.len_epoch)
             if epoch % n_epochs == 0:
                 self.lr_scheduler.step(result[self.mnt_metric.split('_')[1]])
 
