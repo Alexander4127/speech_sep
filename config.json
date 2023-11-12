@@ -1,5 +1,5 @@
 {
-  "name": "4_finetune_with_reduce_lr",
+  "name": "4_finetune_with_reduce_ls_test_mode",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -40,7 +40,7 @@
           },
           "max_length": 15000,
           "max_speakers": 250,
-          "reuse": false
+          "reuse": true
         }
       }
     },
@@ -62,7 +62,8 @@
           "snr_levels": 0,
           "max_length": 500,
           "max_speakers": 10,
-          "reuse": true,
+          "test": true,
+          "reuse": false,
           "limit": 300
         }
       }
@@ -129,7 +130,7 @@
     "args": {
       "mode": "max",
       "factor": 0.5,
-      "patience": 12
+      "patience": 50
     }
   },
   "trainer": {
@@ -142,7 +143,7 @@
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "4_finetune_with_reduce_lr",
+    "wandb_name": "4_finetune_with_reduce_lr_test_mode",
     "len_epoch": 500,
     "log_step": 50,
     "grad_norm_clip": 100
