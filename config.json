@@ -39,7 +39,7 @@
             },
             "module": "ss.datasets"
           },
-          "max_length": 7000,
+          "max_length": 10000,
           "max_speakers": 250,
           "reuse": true
         }
