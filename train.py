@@ -23,11 +23,14 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
 
-def main(config):
+def main(config, create_loaders: bool = False):
     logger = config.get_logger("train")
 
     # setup data_loader instances
     dataloaders = get_dataloaders(config)
+    if create_loaders:
+        logger.info('Loaders successfully created')
+        return
 
     # build model architecture, then print to console
     model = config.init_obj(config["arch"], module_arch)
@@ -83,6 +86,13 @@ if __name__ == "__main__":
         default=None,
         type=str,
         help="path to latest checkpoint (default: None)",
+    )
+    args.add_argument(
+        "-l",
+        "--loaders-only",
+        default=False,
+        type=bool,
+        help="create dataloaders only and exit program"
     )
     args.add_argument(
         "-d",
