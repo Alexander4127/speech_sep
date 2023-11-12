@@ -18,8 +18,10 @@ from ss.trainer import Trainer
 from ss.utils import ROOT_PATH
 from ss.utils.object_loading import get_dataloaders
 from ss.utils.parse_config import ConfigParser
+from train import SEED
 
 DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
+torch.manual_seed(SEED)
 
 
 def main(config, out_file, gen_dir):
@@ -72,7 +74,7 @@ def main(config, out_file, gen_dir):
                 batch.update(output)
 
                 for i in range(len(batch["short"])):
-                    loudness = meter.integrated_loudness(batch["short"][i].detach().cpu().numpy())
+                    loudness = meter.integrated_loudness(batch["short"][i].cpu().numpy())
                     batch["short"][i] = torch.tensor(
                         pyln.normalize.loudness(batch["short"][i].cpu().numpy(), loudness, -23.0)
                     ).to(device)

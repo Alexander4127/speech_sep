@@ -1,5 +1,5 @@
 {
-  "name": "4_finetune_with_reduce_ls_test_mode",
+  "name": "5_restart_larger_bs",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -24,8 +24,8 @@
   },
   "data": {
     "train": {
-      "batch_size": 2,
-      "num_workers": 2,
+      "batch_size": 5,
+      "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -38,15 +38,15 @@
             },
             "module": "ss.datasets"
           },
-          "max_length": 15000,
+          "max_length": 12000,
           "max_speakers": 250,
           "reuse": true
         }
       }
     },
     "val": {
-      "batch_size": 2,
-      "num_workers": 2,
+      "batch_size": 5,
+      "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -69,8 +69,8 @@
       }
     },
     "test": {
-      "batch_size": 2,
-      "num_workers": 2,
+      "batch_size": 5,
+      "num_workers": 5,
       "dataset": {
         "type": "MixedDataset",
         "args": {
@@ -96,7 +96,7 @@
   "optimizer": {
     "type": "Adam",
     "args": {
-      "lr": 1e-4
+      "lr": 1e-3
     }
   },
   "loss": {
@@ -130,7 +130,7 @@
     "args": {
       "mode": "max",
       "factor": 0.5,
-      "patience": 50
+      "patience": 30
     }
   },
   "trainer": {
@@ -139,11 +139,11 @@
     "save_period": 5,
     "verbosity": 2,
     "monitor": "max val_sdr",
-    "batch_accum": 10,
+    "batch_accum": 6,
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "wandb_name": "4_finetune_with_reduce_lr_test_mode",
+    "wandb_name": "5_restart_larger_bs",
     "len_epoch": 500,
     "log_step": 50,
     "grad_norm_clip": 100
