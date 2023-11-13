@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
     # if `--test-data-folder` was provided, set it as a default test set
     if args.test_data_folder is not None:
-        test_data_folder = Path(args.test_data_folder).absolute().resolve()
+        test_data_folder = Path(args.test_data_folder)
         assert test_data_folder.exists()
         config.config["data"] = {
             "test": {
