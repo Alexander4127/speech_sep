@@ -28,8 +28,10 @@ def get_dataloaders(configs: ConfigParser):
 
         # create and join datasets
         ds = params["dataset"]
-        if ds["type"] == "MixedDataset":
-            ds["args"]["name"] = ds["args"]["underlying"]["args"]["part"]
+        if ds["type"] == "MixedDataset" or ds["type"] == "NoisedDataset":
+            if "name" not in ds["args"]:
+                assert "part" in ds["args"]["underlying"]["args"], f'You should provide name param for {ds["type"]}'
+                ds["args"]["name"] = ds["args"]["underlying"]["args"]["part"]
             ds["args"]["underlying"] = configs.init_obj(
                 ds["args"]["underlying"], ss.datasets, config_parser=configs)
         dataset = configs.init_obj(ds, ss.datasets, config_parser=configs, augs=augs)
