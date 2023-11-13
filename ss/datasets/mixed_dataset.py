@@ -40,6 +40,7 @@ class MixedDataset(BaseDataset):
                  reuse: bool = True,
                  test: bool = False,
                  snr_levels: tp.Tuple = (-5, -2, 0, 2, 5),
+                 vad_merge: tp.Optional[int] = 20,
                  *args, **kwargs):
         data_dir = ROOT_PATH / "data" / "datasets" / "mixed"
         data_dir.mkdir(exist_ok=True, parents=True)
@@ -52,6 +53,7 @@ class MixedDataset(BaseDataset):
         self._max_length = max_length
         self._test = test
         self._snr_levels = [snr_levels] if not isinstance(snr_levels, tp.Iterable) else list(snr_levels)
+        self._vad_merge = vad_merge
 
         index = self._get_or_load_index(name, underlying, reuse)
         self._speakers = sorted({d["speaker_id"] for d in index})
@@ -74,7 +76,7 @@ class MixedDataset(BaseDataset):
         return index
 
     def _generate_triplets(self, underlying: BaseDataset):
-        np.random.seed(0)
+        random.seed(0)
         under_index = deepcopy(underlying._index)
         for idx, data in enumerate(under_index):
             data["index"] = idx
@@ -132,7 +134,7 @@ class MixedDataset(BaseDataset):
                            "noise_id": triplets["noise_id"][i]}
 
                 futures.append(pool.submit(create_mix, i, triplet, self._snr_levels, out_dir,
-                                           test=self._test))
+                                           test=self._test, vad_db=self._vad_merge))
 
             for i, future in tqdm(enumerate(futures), desc="Creating mixes...", total=len(futures)):
                 d_paths = future.result()

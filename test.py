@@ -12,6 +12,7 @@ import soundfile as sf
 import torch
 from tqdm import tqdm
 
+from ss.datasets.utils import split_batch, stack_batch, merge_batch
 from ss.metric import PESQMetric, SISDRMetric
 import ss.model as module_model
 from ss.trainer import Trainer
@@ -24,7 +25,7 @@ DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
 torch.manual_seed(SEED)
 
 
-def main(config, out_file, gen_dir):
+def main(config, out_file, gen_dir, segment_size):
     logger = config.get_logger("test")
 
     # define cpu or gpu if possible
@@ -69,8 +70,22 @@ def main(config, out_file, gen_dir):
 
             n_samples = 0
             for batch_num, batch in enumerate(tqdm(dataloaders[test_name], desc=test_name)):
-                batch = Trainer.move_batch_to_device(batch, device)
-                output = model(**batch)
+                if segment_size is None:
+                    batch = Trainer.move_batch_to_device(batch, device)
+                    output = model(**batch)
+                else:
+                    batches, lengths = split_batch(batch, segment_size, sr)
+                    batches_out = []
+                    for batch_lst, length in zip(batches, lengths):
+                        batches_in = []
+                        for batch_in in batch_lst:
+                            batch_in = Trainer.move_batch_to_device(batch_in, device)
+                            batch_out = model(**batch_in)
+                            batch_in.update(batch_out)
+                            batches_in.append(batch_in)
+                        batches_out.append(stack_batch(batches_in, length))
+                    output = merge_batch(batches_out)
+
                 batch.update(output)
 
                 for i in range(len(batch["short"])):
@@ -154,6 +169,13 @@ if __name__ == "__main__":
         help="Path to dataset",
     )
     args.add_argument(
+        "-s",
+        "--segment-audio",
+        default=None,
+        type=int,
+        help="Split each audio into chunks with provided length"
+    )
+    args.add_argument(
         "-b",
         "--batch-size",
         default=2,
@@ -204,4 +226,4 @@ if __name__ == "__main__":
         config["data"][test_name]["batch_size"] = args.batch_size
         config["data"][test_name]["n_jobs"] = args.jobs
 
-    main(config, args.output, args.generate_dataset)
+    main(config, args.output, args.generate_dataset, args.segment_audio)

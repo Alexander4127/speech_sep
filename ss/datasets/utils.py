@@ -39,11 +39,11 @@ def cut_audios(s1, s2, sec, sr, equal_lengths: bool = False):
 
         segment += 1
 
-    if equal_lengths and cut_len < len1:
+    if equal_lengths and len(s1_cut) * cut_len < len1:
         assert len1 == len2
         s1_r, s2_r = s1[cut_len * len(s2_cut):], s2[cut_len * len(s1_cut):]
-        s1_r = np.append(s1_r, np.zeros(len(s1) - cut_len))
-        s2_r = np.append(s2_r, np.zeros(len(s2) - cut_len))
+        s1_r = np.append(s1_r, np.zeros(cut_len - len(s1_r)))
+        s2_r = np.append(s2_r, np.zeros(cut_len - len(s2_r)))
         assert len(s1_r) == len(s2_r) == cut_len
         s1_cut.append(s1_r)
         s2_cut.append(s2_r)
@@ -51,20 +51,46 @@ def cut_audios(s1, s2, sec, sr, equal_lengths: bool = False):
     return s1_cut, s2_cut
 
 
-# def split_batch(batch):
-#     keys = ["mix", "target"]
-#     cut_mix_1, cut_mix_2 = cut_audios(batch["short"])
-#     assert len(cut_mix_1) == len(cut_mix_2)
-#     for idx in range(len(cut_mix_1)):
-#
-#         for key in keys:
-#             current_batch = [batch[key] for set(batch.keys()) - set(keys)]
+def split_batch(batch, size_segment, sr):
+    keys = ["mix", "target"]
+    length = len(batch["mix"][0])
+    batches, lengths = [], []
+    for idx in range(len(batch["mix"])):
+        batches.append([])
+        lengths.append(length)
+        assert len(batch["target"][idx]) == length
+        cut_mix, cut_target = cut_audios(
+            batch["mix"][idx].cpu().numpy(),
+            batch["target"][idx].cpu().numpy(),
+            sec=size_segment,
+            sr=sr,
+            equal_lengths=True
+        )
+        assert len(cut_mix) == len(cut_target)
+        for i in range(len(cut_target)):
+            current_batch = {
+                key: batch[key][idx].unsqueeze(0) if isinstance(batch[key], torch.Tensor) else [batch[key][idx]]
+                for key in set(batch.keys()) - set(keys)
+            }
+            for key, cut in zip(keys, [cut_mix[i], cut_target[i]]):
+                current_batch[key] = torch.tensor(cut, dtype=torch.float32).unsqueeze(0)
+            batches[-1].append(current_batch)
+    return batches, lengths
 
 
 def stack_batch(batches, len_batch, keys=("short", "target")):
     result_batch = deepcopy(batches[0])
     for key in keys:
-        result_batch[key] = torch.stack([batch[key] for batch in batches]).reshape(-1)[:len_batch]
+        result_batch[key] = torch.stack([batch[key][0] for batch in batches]).reshape(-1)[:len_batch]
+    return result_batch
+
+
+def merge_batch(batches, keys=("short", "target"), one_elem_keys=("mix_lengths",)):
+    result_batch = deepcopy(batches[0])
+    for key in keys:
+        result_batch[key] = torch.stack([batch[key] for batch in batches])
+    for key in one_elem_keys:
+        result_batch[key] = torch.stack([batch[key] for batch in batches]).reshape(-1)
     return result_batch
 
 
@@ -74,7 +100,7 @@ def fix_length(s1, s2, min_or_max='max'):
         s1 = s1[:utt_len]
         s2 = s2[:utt_len]
     else:
-        utt_len = np.maximum(len(s1), len(s2))
+        utt_len = max(len(s1), len(s2))
         s1 = np.append(s1, np.zeros(utt_len - len(s1)))
         s2 = np.append(s2, np.zeros(utt_len - len(s2)))
     return s1, s2
@@ -88,8 +114,11 @@ def create_mix(idx, triplet, snr_levels, out_dir, audio_len=3, test=False, sr=16
     noise_id = triplet["noise_id"]
 
     s1, _ = sf.read(os.path.join('', s1_path))
+    s1 = s1[:, 0] if len(s1.shape) > 1 else s1
     s2, _ = sf.read(os.path.join('', s2_path))
+    s2 = s2[:, 0] if len(s2.shape) > 1 else s2
     ref, _ = sf.read(os.path.join('', ref_path))
+    ref = ref[:, 0] if len(ref.shape) > 1 else ref
 
     meter = pyln.Meter(sr)
 
@@ -153,6 +182,7 @@ def create_mix(idx, triplet, snr_levels, out_dir, audio_len=3, test=False, sr=16
             )
     else:
         s1, s2 = fix_length(s1, s2, 'max')
+        assert len(s1) == len(s2)
         mix = snr_mixer(s1, s2, snr)
         louds1 = meter.integrated_loudness(s1)
         s1 = pyln.normalize.loudness(s1, louds1, -23.0)
