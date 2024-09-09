@@ -2,7 +2,7 @@
 
 ## Report
 
-The introduction, technical details, and results are presented in the [wandb report](https://wandb.ai/practice-cifar/ss_project/reports/Speech-Separation-Report--Vmlldzo1OTUyNzgx).
+The introduction, technical details, and results are presented in the [wandb report](https://wandb.ai/practice-cifar/ss_project/reports/Speech-Separation-Report--Vmlldzo1OTQwNTk1).
 
 ## Installation guide
 
